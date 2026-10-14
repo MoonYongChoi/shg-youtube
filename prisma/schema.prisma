@@ -60,3 +60,12 @@ model CommentHistory {
 
   @@index([commentId])
 }
+
+model GoogleAuth {
+  id           String   @id @default("default")
+  accessToken  String
+  refreshToken String
+  expiryDate   DateTime
+  scope        String
+  updatedAt    DateTime @updatedAt
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ChannelForm } from "@/components/ChannelForm";
+import { GoogleConnectButton } from "@/components/GoogleConnectButton";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,10 @@ export default async function Home() {
       <p className="mt-2 text-sm text-zinc-500">
         채널 URL이나 핸들(@채널명)을 입력하면 해당 채널의 영상 목록을 가져옵니다.
       </p>
+
+      <div className="mt-4">
+        <GoogleConnectButton />
+      </div>
 
       <div className="mt-8">
         <ChannelForm />

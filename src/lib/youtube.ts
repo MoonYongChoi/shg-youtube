@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { getAuthenticatedYoutubeClient } from "@/lib/googleAuth";
 
 const youtube = google.youtube({
   version: "v3",
@@ -131,10 +132,12 @@ export interface FetchedComment {
 export async function fetchAllComments(videoId: string): Promise<FetchedComment[]> {
   const comments: FetchedComment[] = [];
   let pageToken: string | undefined;
+  // 멤버십 영상 댓글은 API 키만으로는 403이 나므로, 구글 계정이 연동되어 있으면 그 권한으로 조회
+  const client = (await getAuthenticatedYoutubeClient()) ?? youtube;
 
   do {
     const res = await wrap(
-      youtube.commentThreads.list({
+      client.commentThreads.list({
         part: ["snippet", "replies"],
         videoId,
         maxResults: 100,
@@ -184,5 +187,47 @@ function toFetchedComment(
     likeCount: snippet.likeCount ?? 0,
     publishedAt: new Date(snippet.publishedAt ?? Date.now()),
     updatedAt: new Date(snippet.updatedAt ?? snippet.publishedAt ?? Date.now()),
+  };
+}
+
+/** youtu.be, watch?v=, shorts/ URL과 순수 영상 ID를 모두 파싱 */
+export function extractVideoId(input: string): string | null {
+  const trimmed = input.trim();
+
+  const urlMatch = trimmed.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/i,
+  );
+  if (urlMatch) return urlMatch[1];
+
+  if (/^[\w-]{11}$/.test(trimmed)) return trimmed;
+
+  return null;
+}
+
+export interface VideoMeta {
+  id: string;
+  title: string;
+  thumbnailUrl: string | null;
+  publishedAt: Date;
+  channelId: string;
+  channelTitle: string;
+}
+
+/** 영상 ID로 단일 영상 메타정보 조회 (멤버십 영상도 메타데이터는 API 키로 조회 가능) */
+export async function fetchVideoById(videoId: string): Promise<VideoMeta> {
+  const res = await wrap(youtube.videos.list({ part: ["snippet"], id: [videoId] }));
+  const video = res.data.items?.[0];
+  if (!video?.id || !video.snippet?.channelId) {
+    throw new YoutubeApiError("영상을 찾을 수 없습니다.", 404);
+  }
+
+  return {
+    id: video.id,
+    title: video.snippet.title ?? video.id,
+    thumbnailUrl:
+      video.snippet.thumbnails?.medium?.url ?? video.snippet.thumbnails?.default?.url ?? null,
+    publishedAt: new Date(video.snippet.publishedAt ?? Date.now()),
+    channelId: video.snippet.channelId,
+    channelTitle: video.snippet.channelTitle ?? video.snippet.channelId,
   };
 }
