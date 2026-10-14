@@ -36,8 +36,8 @@ curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/resc
 ## 배포 (Vercel)
 
 1. Vercel 프로젝트에 `YOUTUBE_API_KEY`, `DATABASE_URL`, `CRON_SECRET` 환경변수를 동일하게 등록
-2. `vercel.json`에 정의된 Cron Job(`/api/cron/rescrape`, 6시간마다)이 자동으로 등록됩니다
-   - ⚠️ Vercel Hobby(무료) 플랜은 Cron Job 실행 주기가 **하루 1회**로 제한됩니다. 더 자주 재수집하려면 Pro 플랜이 필요합니다. `vercel.json`의 `schedule`을 플랜에 맞게 조정하세요
+2. `vercel.json`에 정의된 Cron Job(`/api/cron/rescrape`, 매일 자정 UTC 1회)이 자동으로 등록됩니다
+   - Vercel Hobby(무료) 플랜은 Cron Job 실행 주기가 **하루 1회**로 제한되어 있어 기본값을 하루 1회로 맞춰뒀습니다. 더 자주(예: 6시간마다) 재수집하려면 Pro 플랜으로 업그레이드한 뒤 `vercel.json`의 `schedule`을 `"0 */6 * * *"` 등으로 바꾸세요
 3. 배포 후 Vercel 대시보드의 **Cron Jobs** 탭에서 실행 로그 확인 가능
 
 ## 알아둘 점
