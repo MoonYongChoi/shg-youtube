@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Channel {
+  id        String   @id
+  title     String
+  handle    String?
+  createdAt DateTime @default(now())
+  videos    Video[]
+}
+
+model Video {
+  id            String    @id
+  channelId     String
+  channel       Channel   @relation(fields: [channelId], references: [id])
+  title         String
+  thumbnailUrl  String?
+  publishedAt   DateTime
+  isMembersOnly Boolean   @default(false)
+  monitored     Boolean   @default(false)
+  lastScrapedAt DateTime?
+  comments      Comment[]
+
+  @@index([channelId])
+}
+
+model Comment {
+  id               String           @id
+  videoId          String
+  video            Video            @relation(fields: [videoId], references: [id])
+  parentId         String?
+  authorName       String
+  authorProfileUrl String?
+  textOriginal     String
+  likeCount        Int              @default(0)
+  publishedAt      DateTime
+  updatedAt        DateTime
+  isDeleted        Boolean          @default(false)
+  deletedAt        DateTime?
+  history          CommentHistory[]
+
+  @@index([videoId])
+}
+
+model CommentHistory {
+  id           String   @id @default(cuid())
+  commentId    String
+  comment      Comment  @relation(fields: [commentId], references: [id])
+  textOriginal String
+  likeCount    Int
+  updatedAt    DateTime
+  capturedAt   DateTime @default(now())
+
+  @@index([commentId])
+}
