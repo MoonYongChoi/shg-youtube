@@ -6,7 +6,9 @@ import { RecollectButton } from "@/components/RecollectButton";
 
 export default async function VideoPage({
   params,
-}: PageProps<"/videos/[videoId]">) {
+}: {
+  params: Promise<{ videoId: string }>;
+}) {
   const { videoId } = await params;
 
   const video = await prisma.video.findUnique({

@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   _request: Request,
-  ctx: RouteContext<"/api/channels/[channelId]/videos">,
+  { params }: { params: Promise<{ channelId: string }> },
 ) {
-  const { channelId } = await ctx.params;
+  const { channelId } = await params;
 
   const videos = await prisma.video.findMany({
     where: { channelId },

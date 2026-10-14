@@ -4,9 +4,9 @@ import { commentsToCsv, type CommentCsvRow } from "@/lib/csv";
 
 export async function GET(
   _request: Request,
-  ctx: RouteContext<"/api/videos/[videoId]/export">,
+  { params }: { params: Promise<{ videoId: string }> },
 ) {
-  const { videoId } = await ctx.params;
+  const { videoId } = await params;
 
   const comments = await prisma.comment.findMany({
     where: { videoId },

@@ -4,9 +4,9 @@ import { YoutubeApiError } from "@/lib/youtube";
 
 export async function POST(
   _request: Request,
-  ctx: RouteContext<"/api/videos/[videoId]/collect">,
+  { params }: { params: Promise<{ videoId: string }> },
 ) {
-  const { videoId } = await ctx.params;
+  const { videoId } = await params;
 
   try {
     const result = await collectComments(videoId);

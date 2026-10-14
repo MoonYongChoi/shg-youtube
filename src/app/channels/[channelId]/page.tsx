@@ -7,7 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function ChannelPage({
   params,
-}: PageProps<"/channels/[channelId]">) {
+}: {
+  params: Promise<{ channelId: string }>;
+}) {
   const { channelId } = await params;
 
   const channel = await prisma.channel.findUnique({

@@ -4,9 +4,9 @@ import { collectComments } from "@/lib/collect";
 
 export async function PATCH(
   request: NextRequest,
-  ctx: RouteContext<"/api/videos/[videoId]">,
+  { params }: { params: Promise<{ videoId: string }> },
 ) {
-  const { videoId } = await ctx.params;
+  const { videoId } = await params;
   const body = await request.json().catch(() => null);
 
   if (!body || (body.isMembersOnly === undefined && body.monitored === undefined)) {

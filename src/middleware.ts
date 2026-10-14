@@ -4,7 +4,7 @@ import { createHash } from "crypto";
 
 const COOKIE_NAME = "app_auth";
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const expected = createHash("sha256").update(process.env.APP_PASSWORD ?? "").digest("hex");
   const cookie = request.cookies.get(COOKIE_NAME)?.value;
 
@@ -16,6 +16,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
+  runtime: "nodejs",
   matcher: [
     "/((?!login|api/auth/login|api/cron|_next/static|_next/image|favicon.ico).*)",
   ],
