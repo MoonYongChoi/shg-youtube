@@ -2,8 +2,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { VideoSelectionTable } from "@/components/VideoSelectionTable";
 
-export const instant = false;
-
 export default async function ChannelPage({
   params,
 }: PageProps<"/channels/[channelId]">) {

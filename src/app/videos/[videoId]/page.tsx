@@ -4,8 +4,6 @@ import { CommentTable } from "@/components/CommentTable";
 import { ExportButton } from "@/components/ExportButton";
 import { RecollectButton } from "@/components/RecollectButton";
 
-export const instant = false;
-
 export default async function VideoPage({
   params,
 }: PageProps<"/videos/[videoId]">) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ChannelForm } from "@/components/ChannelForm";
 
-export const instant = false;
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const channels = await prisma.channel.findMany({
