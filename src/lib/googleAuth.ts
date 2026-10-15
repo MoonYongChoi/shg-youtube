@@ -2,7 +2,11 @@ import { google } from "googleapis";
 import { prisma } from "@/lib/prisma";
 
 const GOOGLE_AUTH_ROW_ID = "default";
-const YOUTUBE_READONLY_SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
+// commentThreads.list는 youtube.readonly만으로는 "insufficient authentication scopes"가 나서 force-ssl도 필요
+const YOUTUBE_SCOPES = [
+  "https://www.googleapis.com/auth/youtube.readonly",
+  "https://www.googleapis.com/auth/youtube.force-ssl",
+];
 
 function createOAuth2Client(redirectUri: string) {
   return new google.auth.OAuth2({
@@ -17,7 +21,7 @@ export function getAuthUrl(redirectUri: string): string {
   return client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
-    scope: [YOUTUBE_READONLY_SCOPE],
+    scope: YOUTUBE_SCOPES,
   });
 }
 
@@ -38,13 +42,13 @@ export async function exchangeCodeForTokens(code: string, redirectUri: string): 
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiryDate: new Date(tokens.expiry_date),
-      scope: tokens.scope ?? YOUTUBE_READONLY_SCOPE,
+      scope: tokens.scope ?? YOUTUBE_SCOPES.join(" "),
     },
     update: {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiryDate: new Date(tokens.expiry_date),
-      scope: tokens.scope ?? YOUTUBE_READONLY_SCOPE,
+      scope: tokens.scope ?? YOUTUBE_SCOPES.join(" "),
     },
   });
 }
