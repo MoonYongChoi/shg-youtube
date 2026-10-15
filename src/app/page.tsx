@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ChannelForm } from "@/components/ChannelForm";
 import { GoogleConnectButton } from "@/components/GoogleConnectButton";
+import { DeleteChannelButton } from "@/components/DeleteChannelButton";
 
 export const dynamic = "force-dynamic";
 
@@ -33,14 +34,14 @@ export default async function Home() {
         ) : (
           <ul className="mt-3 divide-y divide-zinc-200">
             {channels.map((c) => (
-              <li key={c.id}>
-                <Link
-                  href={`/channels/${c.id}`}
-                  className="flex items-center justify-between py-3 hover:bg-zinc-50"
-                >
+              <li key={c.id} className="flex items-center justify-between py-3 hover:bg-zinc-50">
+                <Link href={`/channels/${c.id}`} className="flex-1">
                   <span className="font-medium">{c.title}</span>
-                  <span className="text-sm text-zinc-500">{c._count.videos}개 영상</span>
                 </Link>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-zinc-500">{c._count.videos}개 영상</span>
+                  <DeleteChannelButton channelId={c.id} channelTitle={c.title} />
+                </div>
               </li>
             ))}
           </ul>

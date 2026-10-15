@@ -19,7 +19,7 @@ model Channel {
 model Video {
   id            String    @id
   channelId     String
-  channel       Channel   @relation(fields: [channelId], references: [id])
+  channel       Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
   title         String
   thumbnailUrl  String?
   publishedAt   DateTime
@@ -34,7 +34,7 @@ model Video {
 model Comment {
   id               String           @id
   videoId          String
-  video            Video            @relation(fields: [videoId], references: [id])
+  video            Video            @relation(fields: [videoId], references: [id], onDelete: Cascade)
   parentId         String?
   authorName       String
   authorProfileUrl String?
@@ -52,7 +52,7 @@ model Comment {
 model CommentHistory {
   id           String   @id @default(cuid())
   commentId    String
-  comment      Comment  @relation(fields: [commentId], references: [id])
+  comment      Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
   textOriginal String
   likeCount    Int
   updatedAt    DateTime
