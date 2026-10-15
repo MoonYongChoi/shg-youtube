@@ -6,7 +6,7 @@ import { useState } from "react";
 export function RefreshVideosButton({ channelId }: { channelId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
   async function handleRefresh() {
     setLoading(true);
@@ -19,12 +19,16 @@ export function RefreshVideosButton({ channelId }: { channelId: string }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setMessage(data.error ?? "새로고침에 실패했습니다.");
+        setMessage({ text: data.error ?? "새로고침에 실패했습니다.", isError: true });
         return;
       }
+      setMessage({
+        text: data.newVideos > 0 ? `새 영상 ${data.newVideos}개 추가됨` : "새 영상 없음",
+        isError: false,
+      });
       router.refresh();
     } catch {
-      setMessage("요청 중 오류가 발생했습니다.");
+      setMessage({ text: "요청 중 오류가 발생했습니다.", isError: true });
     } finally {
       setLoading(false);
     }
@@ -39,7 +43,11 @@ export function RefreshVideosButton({ channelId }: { channelId: string }) {
       >
         {loading ? "확인 중..." : "새로고침"}
       </button>
-      {message && <p className="text-xs text-red-600">{message}</p>}
+      {message && (
+        <p className={`text-xs ${message.isError ? "text-red-600" : "text-stone-500"}`}>
+          {message.text}
+        </p>
+      )}
     </div>
   );
 }

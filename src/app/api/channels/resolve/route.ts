@@ -14,7 +14,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await syncChannelVideos(channelInput);
-    return NextResponse.json({ channelId: result.channelId, videoCount: result.totalVideos });
+    return NextResponse.json({
+      channelId: result.channelId,
+      videoCount: result.totalVideos,
+      newVideos: result.newVideos,
+    });
   } catch (err) {
     if (err instanceof YoutubeApiError) {
       return NextResponse.json({ error: err.message }, { status: err.status ?? 502 });
