@@ -24,11 +24,11 @@ export default async function VideoPage({
   if (!video) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">{video.title}</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold sm:text-2xl">{video.title}</h1>
+          <p className="mt-1 text-sm text-stone-500">
             댓글 {video.comments.length}개 · 마지막 수집:{" "}
             {video.lastScrapedAt ? video.lastScrapedAt.toLocaleString("ko-KR") : "없음"}
           </p>

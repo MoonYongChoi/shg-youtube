@@ -24,12 +24,12 @@ export function GoogleConnectButton() {
       {connected ? (
         <>
           <span className="text-green-700">구글 계정 연동됨</span>
-          <button onClick={handleDisconnect} className="text-zinc-500 underline">
+          <button onClick={handleDisconnect} className="text-stone-500 underline">
             연동 해제
           </button>
         </>
       ) : (
-        <a href="/api/auth/google" className="text-blue-600 underline">
+        <a href="/api/auth/google" className="text-amber-800 underline">
           구글 계정 연동하기 (멤버십 댓글 조회용)
         </a>
       )}

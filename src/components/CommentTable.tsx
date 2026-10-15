@@ -29,16 +29,16 @@ export function CommentTable({ comments }: { comments: CommentRow[] }) {
   }
 
   if (topLevel.length === 0) {
-    return <p className="text-sm text-zinc-400">아직 수집된 댓글이 없습니다.</p>;
+    return <p className="text-sm text-stone-400">아직 수집된 댓글이 없습니다.</p>;
   }
 
   return (
     <ul className="flex flex-col gap-3">
       {topLevel.map((comment) => (
-        <li key={comment.id} className="rounded-xl border border-zinc-200 p-4">
+        <li key={comment.id} className="rounded-xl border border-stone-200 p-4">
           <CommentItem comment={comment} />
           {(repliesByParent.get(comment.id) ?? []).map((reply) => (
-            <div key={reply.id} className="ml-8 mt-3 border-l border-zinc-200 pl-4">
+            <div key={reply.id} className="mt-3 ml-4 border-l border-stone-200 pl-3 sm:ml-8 sm:pl-4">
               <CommentItem comment={reply} />
             </div>
           ))}
@@ -53,35 +53,35 @@ function CommentItem({ comment }: { comment: CommentRow }) {
 
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
         <span className="text-sm font-medium">{comment.authorName}</span>
-        <span className="text-xs text-zinc-400">
+        <span className="text-xs text-stone-400">
           {new Date(comment.publishedAt).toLocaleString("ko-KR")}
         </span>
       </div>
       <p className="mt-1 text-sm whitespace-pre-wrap">
-        {comment.isDeleted ? <span className="text-zinc-400 italic">(삭제됨)</span> : comment.textOriginal}
+        {comment.isDeleted ? <span className="text-stone-400 italic">(삭제됨)</span> : comment.textOriginal}
       </p>
-      <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500">
+      <div className="mt-1 flex items-center gap-3 text-xs text-stone-500">
         <span>좋아요 {comment.likeCount}</span>
         {comment.history.length > 0 && (
           <button
             onClick={() => setShowHistory((v) => !v)}
-            className="underline hover:text-zinc-700"
+            className="underline hover:text-stone-700"
           >
             수정 히스토리 {comment.history.length}건 {showHistory ? "숨기기" : "보기"}
           </button>
         )}
       </div>
       {showHistory && (
-        <ul className="mt-2 space-y-2 rounded bg-zinc-50 p-3 text-xs">
+        <ul className="mt-2 space-y-2 rounded bg-stone-50 p-3 text-xs">
           {comment.history.map((h, idx) => (
             <li key={idx}>
-              <span className="text-zinc-400">
+              <span className="text-stone-400">
                 {new Date(h.capturedAt).toLocaleString("ko-KR")} 이전 버전:
               </span>{" "}
               <span className="whitespace-pre-wrap">{h.textOriginal}</span>{" "}
-              <span className="text-zinc-400">(좋아요 {h.likeCount})</span>
+              <span className="text-stone-400">(좋아요 {h.likeCount})</span>
             </li>
           ))}
         </ul>

@@ -4,6 +4,7 @@ import { syncChannelVideos } from "@/lib/collect";
 import { VideoSelectionTable } from "@/components/VideoSelectionTable";
 import { AddVideoForm } from "@/components/AddVideoForm";
 import { DeleteChannelButton } from "@/components/DeleteChannelButton";
+import { RefreshVideosButton } from "@/components/RefreshVideosButton";
 
 export const dynamic = "force-dynamic";
 
@@ -34,12 +35,15 @@ export default async function ChannelPage({
   if (!channel) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{channel.title}</h1>
-        <DeleteChannelButton channelId={channel.id} channelTitle={channel.title} redirectTo="/" />
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">{channel.title}</h1>
+        <div className="flex shrink-0 items-center gap-3">
+          <RefreshVideosButton channelId={channel.id} />
+          <DeleteChannelButton channelId={channel.id} channelTitle={channel.title} redirectTo="/" />
+        </div>
       </div>
-      <p className="mt-2 text-sm text-zinc-500">
+      <p className="mt-2 text-sm text-stone-500">
         멤버십 전용 영상을 체크하고 모니터링을 켜면 댓글 수집이 시작됩니다.
       </p>
 

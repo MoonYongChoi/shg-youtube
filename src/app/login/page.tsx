@@ -35,7 +35,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col justify-center px-6 py-32">
+    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-4 py-12 sm:px-6">
       <h1 className="text-xl font-semibold">비밀번호 입력</h1>
       <form onSubmit={handleSubmit} className="mt-6">
         <input
@@ -44,12 +44,12 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="비밀번호"
           autoFocus
-          className="w-full rounded border border-zinc-300 px-3 py-2 text-sm"
+          className="w-full rounded border border-stone-300 px-3 py-2 text-sm"
         />
         <button
           type="submit"
           disabled={loading}
-          className="mt-3 w-full rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="mt-3 w-full rounded bg-stone-800 hover:bg-stone-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
           {loading ? "확인 중..." : "입장"}
         </button>

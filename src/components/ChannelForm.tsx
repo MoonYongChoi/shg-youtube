@@ -36,18 +36,18 @@ export function ChannelForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="https://www.youtube.com/@채널명 또는 @채널명"
-          className="flex-1 rounded border border-zinc-300 px-3 py-2 text-sm"
+          className="flex-1 rounded border border-stone-300 px-3 py-2 text-sm"
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded bg-stone-800 px-4 py-2 text-sm font-medium text-white hover:bg-stone-900 disabled:opacity-50"
         >
           {loading ? "불러오는 중..." : "채널 불러오기"}
         </button>

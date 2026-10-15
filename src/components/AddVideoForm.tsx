@@ -37,18 +37,18 @@ export function AddVideoForm() {
 
   return (
     <form onSubmit={handleSubmit} className="mt-4">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="멤버십 영상 URL (채널 목록에 안 뜨는 영상 직접 추가)"
-          className="flex-1 rounded border border-zinc-300 px-3 py-2 text-sm"
+          className="flex-1 rounded border border-stone-300 px-3 py-2 text-sm"
         />
         <button
           type="submit"
           disabled={loading}
-          className="rounded border border-zinc-300 px-4 py-2 text-sm font-medium disabled:opacity-50"
+          className="rounded border border-stone-300 px-4 py-2 text-sm font-medium disabled:opacity-50"
         >
           {loading ? "추가 중..." : "추가"}
         </button>
