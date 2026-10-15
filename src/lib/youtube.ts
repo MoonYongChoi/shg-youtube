@@ -82,8 +82,15 @@ export interface ChannelVideo {
 
 const MAX_CHANNEL_VIDEO_PAGES = 10; // uploads 재생목록 최대 10페이지(최신 500개)까지만 — 업로드가 아주 많은 채널에서 요청이 끝없이 걸리는 것을 방지
 
-/** uploads 재생목록을 페이지네이션으로 순회해 채널의 최신 영상을 가져온다 (최대 500개) */
-export async function fetchChannelVideos(uploadsPlaylistId: string): Promise<ChannelVideo[]> {
+/**
+ * uploads 재생목록을 페이지네이션으로 순회해 채널의 최신 영상을 가져온다 (최대 500개).
+ * knownVideoIds를 주면, 재생목록 순서(최신순)상 한 페이지가 전부 이미 아는 영상이면 그 이후는
+ * 더 볼 필요가 없으므로 중단한다 (채널 재방문 시 "새 영상 있는지"만 가볍게 확인하기 위함).
+ */
+export async function fetchChannelVideos(
+  uploadsPlaylistId: string,
+  knownVideoIds?: Set<string>,
+): Promise<ChannelVideo[]> {
   const videos: ChannelVideo[] = [];
   let pageToken: string | undefined;
   let page = 0;
@@ -98,9 +105,13 @@ export async function fetchChannelVideos(uploadsPlaylistId: string): Promise<Cha
       }),
     );
 
-    for (const item of res.data.items ?? []) {
+    const items = res.data.items ?? [];
+    let allKnown = items.length > 0;
+
+    for (const item of items) {
       const videoId = item.snippet?.resourceId?.videoId;
       if (!videoId) continue;
+      if (!knownVideoIds?.has(videoId)) allKnown = false;
       videos.push({
         id: videoId,
         title: item.snippet?.title ?? videoId,
@@ -112,6 +123,7 @@ export async function fetchChannelVideos(uploadsPlaylistId: string): Promise<Cha
 
     pageToken = res.data.nextPageToken ?? undefined;
     page++;
+    if (allKnown) break;
   } while (pageToken && page < MAX_CHANNEL_VIDEO_PAGES);
 
   return videos;
@@ -148,14 +160,15 @@ export async function fetchAllComments(videoId: string): Promise<FetchedComment[
 
     for (const thread of res.data.items ?? []) {
       const top = thread.snippet?.topLevelComment;
+      const firstReply = thread.replies?.comments?.[0];
+
+      // 대댓글이 하나도 없는 댓글은 수집하지 않음
+      if (!firstReply?.id || !firstReply.snippet) continue;
+
       if (top?.id && top.snippet) {
         comments.push(toFetchedComment(top.id, null, top.snippet));
       }
-
-      const firstReply = thread.replies?.comments?.[0];
-      if (firstReply?.id && firstReply.snippet) {
-        comments.push(toFetchedComment(firstReply.id, top?.id ?? null, firstReply.snippet));
-      }
+      comments.push(toFetchedComment(firstReply.id, top?.id ?? null, firstReply.snippet));
     }
 
     pageToken = res.data.nextPageToken ?? undefined;

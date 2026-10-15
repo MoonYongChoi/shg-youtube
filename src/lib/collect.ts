@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { fetchAllComments } from "@/lib/youtube";
+import { fetchAllComments, fetchChannelVideos, resolveChannel } from "@/lib/youtube";
 
 export interface CollectResult {
   videoId: string;
@@ -90,4 +90,54 @@ export async function collectComments(videoId: string): Promise<CollectResult> {
   });
 
   return { videoId, fetched: fetched.length, created, updated, deleted };
+}
+
+export interface SyncChannelResult {
+  channelId: string;
+  totalVideos: number;
+  newVideos: number;
+}
+
+/**
+ * 채널의 uploads 재생목록을 다시 조회해 새로 올라온 영상이 있으면 DB에 추가한다.
+ * channelInput은 채널ID, 핸들(@xxx), 전체 URL 중 어떤 형태든 가능하다.
+ */
+export async function syncChannelVideos(channelInput: string): Promise<SyncChannelResult> {
+  const channel = await resolveChannel(channelInput);
+
+  const existing = await prisma.video.findMany({
+    where: { channelId: channel.id },
+    select: { id: true },
+  });
+  const knownIds = new Set(existing.map((v) => v.id));
+
+  const videos = await fetchChannelVideos(channel.uploadsPlaylistId, knownIds);
+
+  await prisma.channel.upsert({
+    where: { id: channel.id },
+    create: { id: channel.id, title: channel.title, handle: channel.handle },
+    update: { title: channel.title, handle: channel.handle },
+  });
+
+  await Promise.all(
+    videos.map((video) =>
+      prisma.video.upsert({
+        where: { id: video.id },
+        create: {
+          id: video.id,
+          channelId: channel.id,
+          title: video.title,
+          thumbnailUrl: video.thumbnailUrl,
+          publishedAt: video.publishedAt,
+        },
+        update: {
+          title: video.title,
+          thumbnailUrl: video.thumbnailUrl,
+        },
+      }),
+    ),
+  );
+
+  const newVideos = videos.filter((v) => !knownIds.has(v.id)).length;
+  return { channelId: channel.id, totalVideos: videos.length, newVideos };
 }

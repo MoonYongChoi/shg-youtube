@@ -32,9 +32,12 @@ export default async function Home() {
         {channels.length === 0 ? (
           <p className="mt-3 text-sm text-zinc-400">아직 등록된 채널이 없습니다.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-zinc-200">
+          <ul className="mt-3 flex flex-col gap-2">
             {channels.map((c) => (
-              <li key={c.id} className="flex items-center justify-between py-3 hover:bg-zinc-50">
+              <li
+                key={c.id}
+                className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 hover:bg-zinc-50"
+              >
                 <Link href={`/channels/${c.id}`} className="flex-1">
                   <span className="font-medium">{c.title}</span>
                 </Link>

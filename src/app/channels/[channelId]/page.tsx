@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { syncChannelVideos } from "@/lib/collect";
 import { VideoSelectionTable } from "@/components/VideoSelectionTable";
 import { AddVideoForm } from "@/components/AddVideoForm";
 import { DeleteChannelButton } from "@/components/DeleteChannelButton";
@@ -13,9 +14,21 @@ export default async function ChannelPage({
 }) {
   const { channelId } = await params;
 
+  // 페이지 방문 시마다 채널에 새로 올라온 영상이 있는지 가볍게 확인 (이미 아는 영상만 있으면 1페이지만 보고 끝남)
+  try {
+    await syncChannelVideos(channelId);
+  } catch {
+    // 동기화 실패해도 기존에 저장된 목록은 그대로 보여준다
+  }
+
   const channel = await prisma.channel.findUnique({
     where: { id: channelId },
-    include: { videos: { orderBy: { publishedAt: "desc" } } },
+    include: {
+      videos: {
+        orderBy: { publishedAt: "desc" },
+        include: { _count: { select: { comments: true } } },
+      },
+    },
   });
 
   if (!channel) notFound();
@@ -42,6 +55,7 @@ export default async function ChannelPage({
             isMembersOnly: v.isMembersOnly,
             monitored: v.monitored,
             lastScrapedAt: v.lastScrapedAt?.toISOString() ?? null,
+            commentCount: v._count.comments,
           }))}
         />
       </div>

@@ -33,9 +33,9 @@ export function CommentTable({ comments }: { comments: CommentRow[] }) {
   }
 
   return (
-    <ul className="divide-y divide-zinc-100">
+    <ul className="flex flex-col gap-3">
       {topLevel.map((comment) => (
-        <li key={comment.id} className="py-4">
+        <li key={comment.id} className="rounded-xl border border-zinc-200 p-4">
           <CommentItem comment={comment} />
           {(repliesByParent.get(comment.id) ?? []).map((reply) => (
             <div key={reply.id} className="ml-8 mt-3 border-l border-zinc-200 pl-4">
