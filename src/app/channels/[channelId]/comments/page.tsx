@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { CommentTable } from "@/components/CommentTable";
+import { ChannelCommentsSearch } from "@/components/ChannelCommentsSearch";
 
 export const dynamic = "force-dynamic";
 
@@ -40,39 +40,28 @@ export default async function ChannelCommentsPage({
         </Link>
       </div>
 
-      {videos.length === 0 ? (
-        <p className="mt-8 text-sm text-stone-400">아직 수집된 댓글이 없습니다.</p>
-      ) : (
-        <div className="mt-8 flex flex-col gap-10">
-          {videos.map((video) => (
-            <div key={video.id}>
-              <Link
-                href={`/videos/${video.id}`}
-                className="text-sm font-medium text-stone-600 hover:underline"
-              >
-                {video.title}
-              </Link>
-              <p className="mt-0.5 mb-3 text-xs text-stone-400">댓글 {video.comments.length}개</p>
-              <CommentTable
-                comments={video.comments.map((c) => ({
-                  id: c.id,
-                  parentId: c.parentId,
-                  authorName: c.authorName,
-                  textOriginal: c.textOriginal,
-                  likeCount: c.likeCount,
-                  publishedAt: c.publishedAt.toISOString(),
-                  isDeleted: c.isDeleted,
-                  history: c.history.map((h) => ({
-                    textOriginal: h.textOriginal,
-                    likeCount: h.likeCount,
-                    capturedAt: h.capturedAt.toISOString(),
-                  })),
-                }))}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="mt-6">
+        <ChannelCommentsSearch
+          videos={videos.map((video) => ({
+            id: video.id,
+            title: video.title,
+            comments: video.comments.map((c) => ({
+              id: c.id,
+              parentId: c.parentId,
+              authorName: c.authorName,
+              textOriginal: c.textOriginal,
+              likeCount: c.likeCount,
+              publishedAt: c.publishedAt.toISOString(),
+              isDeleted: c.isDeleted,
+              history: c.history.map((h) => ({
+                textOriginal: h.textOriginal,
+                likeCount: h.likeCount,
+                capturedAt: h.capturedAt.toISOString(),
+              })),
+            })),
+          }))}
+        />
+      </div>
     </div>
   );
 }
