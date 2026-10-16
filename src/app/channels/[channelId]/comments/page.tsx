@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ChannelCommentsSearch } from "@/components/ChannelCommentsSearch";
 import { ExportButton } from "@/components/ExportButton";
+import { BackButton } from "@/components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export default async function ChannelCommentsPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
+      <BackButton />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">
           {channel.title} · 전체 댓글

@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { syncChannelVideos } from "@/lib/collect";
 import { VideoSelectionTable } from "@/components/VideoSelectionTable";
 import { AddVideoForm } from "@/components/AddVideoForm";
 import { DeleteChannelButton } from "@/components/DeleteChannelButton";
-import { RefreshVideosButton } from "@/components/RefreshVideosButton";
 import { RecollectAllButton } from "@/components/RecollectAllButton";
+import { BackButton } from "@/components/BackButton";
 
 export const dynamic = "force-dynamic";
+
+// 채널 등록 시 가져온 공개 영상 500개를 매번 재확인하는 건 지금 쓰임새(멤버십 영상만 수동 추가)와
+// 안 맞아서 당분간 꺼둠. 되살리려면 여기서 syncChannelVideos(channelId)를 다시 호출하고
+// RefreshVideosButton을 헤더에 추가하면 됨.
 
 export default async function ChannelPage({
   params,
@@ -16,13 +19,6 @@ export default async function ChannelPage({
   params: Promise<{ channelId: string }>;
 }) {
   const { channelId } = await params;
-
-  // 페이지 방문 시마다 채널에 새로 올라온 영상이 있는지 가볍게 확인 (이미 아는 영상만 있으면 1페이지만 보고 끝남)
-  try {
-    await syncChannelVideos(channelId);
-  } catch {
-    // 동기화 실패해도 기존에 저장된 목록은 그대로 보여준다
-  }
 
   const channel = await prisma.channel.findUnique({
     where: { id: channelId },
@@ -38,10 +34,10 @@ export default async function ChannelPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
+      <BackButton />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">{channel.title}</h1>
         <div className="flex shrink-0 flex-wrap items-center gap-3">
-          <RefreshVideosButton channelId={channel.id} />
           <RecollectAllButton channelId={channel.id} />
           <Link
             href={`/channels/${channel.id}/comments`}

@@ -36,3 +36,17 @@ export async function PATCH(
 
   return NextResponse.json({ video });
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ videoId: string }> },
+) {
+  const { videoId } = await params;
+
+  await prisma.video.delete({ where: { id: videoId } }).catch((err) => {
+    if (err?.code === "P2025") return null; // 이미 없으면 조용히 성공 처리
+    throw err;
+  });
+
+  return NextResponse.json({ ok: true });
+}

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { CommentTable } from "@/components/CommentTable";
 import { ExportButton } from "@/components/ExportButton";
 import { RecollectButton } from "@/components/RecollectButton";
+import { BackButton } from "@/components/BackButton";
 
 export default async function VideoPage({
   params,
@@ -26,6 +27,7 @@ export default async function VideoPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
+      <BackButton />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl font-semibold sm:text-2xl">{video.title}</h1>
