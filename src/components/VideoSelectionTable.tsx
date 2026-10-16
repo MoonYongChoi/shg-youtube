@@ -80,21 +80,27 @@ export function VideoSelectionTable({ videos }: { videos: VideoRow[] }) {
                 {new Date(v.publishedAt).toLocaleDateString("ko-KR")}
               </td>
               <td className="py-3 pr-4 text-center">
-                <input
-                  type="checkbox"
-                  checked={v.isMembersOnly}
-                  disabled={pending === v.id}
-                  onChange={(e) => updateVideo(v.id, { isMembersOnly: e.target.checked })}
-                />
+                <label className="inline-flex cursor-pointer items-center justify-center p-2">
+                  <input
+                    type="checkbox"
+                    checked={v.isMembersOnly}
+                    disabled={pending === v.id}
+                    onChange={(e) => updateVideo(v.id, { isMembersOnly: e.target.checked })}
+                    className="h-6 w-6 cursor-pointer accent-stone-800 sm:h-5 sm:w-5"
+                  />
+                </label>
               </td>
               <td className="py-3 pr-4 text-center">
                 <div className="flex items-center justify-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={v.monitored}
-                    disabled={pending === v.id}
-                    onChange={(e) => updateVideo(v.id, { monitored: e.target.checked })}
-                  />
+                  <label className="inline-flex cursor-pointer items-center justify-center p-2">
+                    <input
+                      type="checkbox"
+                      checked={v.monitored}
+                      disabled={pending === v.id}
+                      onChange={(e) => updateVideo(v.id, { monitored: e.target.checked })}
+                      className="h-6 w-6 cursor-pointer accent-stone-800 sm:h-5 sm:w-5"
+                    />
+                  </label>
                   {pending === v.id && (
                     <span
                       className="h-3 w-3 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600"
