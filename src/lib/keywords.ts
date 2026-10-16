@@ -32,7 +32,11 @@ export interface KeywordCount {
  * 한국어 형태소 분석기 없이 간단한 휴리스틱(공백/문장부호 분리 + 흔한 조사 제거 + 불용어 필터)으로
  * 단어 빈도를 센다. 정확한 형태소 분석은 아니지만 참고용 키워드 랭킹으로는 충분하다.
  */
-export function extractKeywords(texts: string[], topN = 50): KeywordCount[] {
+export function extractKeywords(
+  texts: string[],
+  topN = 50,
+  excludeWords: Set<string> = new Set(),
+): KeywordCount[] {
   const freq = new Map<string, number>();
   const urlRe = /https?:\/\/\S+/g;
   const nonWordRe = /[^\p{L}\p{N}]+/gu;
@@ -45,6 +49,7 @@ export function extractKeywords(texts: string[], topN = 50): KeywordCount[] {
       const stripped = stripParticle(raw);
       if (stripped.length < 2) continue;
       if (STOPWORDS.has(stripped)) continue;
+      if (excludeWords.has(stripped)) continue;
       freq.set(stripped, (freq.get(stripped) ?? 0) + 1);
     }
   }

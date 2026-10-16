@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { extractKeywords } from "@/lib/keywords";
 import { BackButton } from "@/components/BackButton";
+import { ExcludeKeywordButton, RestoreKeywordButton } from "@/components/ExcludeKeywordButton";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,16 @@ export default async function ChannelKeywordsPage({
   const channel = await prisma.channel.findUnique({ where: { id: channelId } });
   if (!channel) notFound();
 
-  const comments = await prisma.comment.findMany({
-    where: { video: { channelId }, isDeleted: false, parentId: null },
-    select: { textOriginal: true },
-  });
+  const [comments, excluded] = await Promise.all([
+    prisma.comment.findMany({
+      where: { video: { channelId }, isDeleted: false, parentId: null },
+      select: { textOriginal: true },
+    }),
+    prisma.excludedKeyword.findMany({ where: { channelId }, orderBy: { createdAt: "desc" } }),
+  ]);
 
-  const keywords = extractKeywords(comments.map((c) => c.textOriginal));
+  const excludeWords = new Set(excluded.map((e) => e.word));
+  const keywords = extractKeywords(comments.map((c) => c.textOriginal), 50, excludeWords);
   const maxCount = keywords[0]?.count ?? 1;
 
   return (
@@ -47,9 +52,27 @@ export default async function ChannelKeywordsPage({
                 />
               </div>
               <span className="w-8 shrink-0 text-right text-xs text-stone-500">{k.count}</span>
+              <ExcludeKeywordButton channelId={channel.id} word={k.word} />
             </li>
           ))}
         </ul>
+      )}
+
+      {excluded.length > 0 && (
+        <div className="mt-10 border-t border-stone-200 pt-4">
+          <h2 className="text-sm font-medium text-stone-500">제외된 키워드 ({excluded.length})</h2>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {excluded.map((e) => (
+              <li
+                key={e.id}
+                className="flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-1 text-xs text-stone-600"
+              >
+                <span>{e.word}</span>
+                <RestoreKeywordButton channelId={channel.id} word={e.word} />
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
