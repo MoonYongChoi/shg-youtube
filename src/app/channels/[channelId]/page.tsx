@@ -45,6 +45,12 @@ export default async function ChannelPage({
           >
             댓글만 모아보기
           </Link>
+          <Link
+            href={`/channels/${channel.id}/keywords`}
+            className="rounded border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-50"
+          >
+            키워드 분석
+          </Link>
           <DeleteChannelButton channelId={channel.id} channelTitle={channel.title} redirectTo="/" />
         </div>
       </div>
