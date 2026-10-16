@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 interface HistoryEntry {
@@ -17,6 +18,8 @@ interface CommentRow {
   publishedAt: string;
   isDeleted: boolean;
   history: HistoryEntry[];
+  videoId?: string;
+  videoTitle?: string;
 }
 
 export function CommentTable({ comments }: { comments: CommentRow[] }) {
@@ -39,7 +42,7 @@ export function CommentTable({ comments }: { comments: CommentRow[] }) {
           <CommentItem comment={comment} />
           {(repliesByParent.get(comment.id) ?? []).map((reply) => (
             <div key={reply.id} className="mt-3 ml-4 border-l border-stone-200 pl-3 sm:ml-8 sm:pl-4">
-              <CommentItem comment={reply} />
+              <CommentItem comment={reply} showVideoTag={false} />
             </div>
           ))}
         </li>
@@ -48,11 +51,25 @@ export function CommentTable({ comments }: { comments: CommentRow[] }) {
   );
 }
 
-function CommentItem({ comment }: { comment: CommentRow }) {
+function CommentItem({
+  comment,
+  showVideoTag = true,
+}: {
+  comment: CommentRow;
+  showVideoTag?: boolean;
+}) {
   const [showHistory, setShowHistory] = useState(false);
 
   return (
     <div>
+      {showVideoTag && comment.videoTitle && comment.videoId && (
+        <Link
+          href={`/videos/${comment.videoId}`}
+          className="mb-1 block truncate text-xs text-stone-400 hover:underline"
+        >
+          {comment.videoTitle}
+        </Link>
+      )}
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
         <span className="text-sm font-medium">{comment.authorName}</span>
         <span className="text-xs text-stone-400">

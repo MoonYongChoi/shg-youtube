@@ -16,15 +16,24 @@ export default async function ChannelCommentsPage({
   const channel = await prisma.channel.findUnique({ where: { id: channelId } });
   if (!channel) notFound();
 
-  const videos = await prisma.video.findMany({
-    where: { channelId, comments: { some: {} } },
-    orderBy: { publishedAt: "desc" },
+  const comments = await prisma.comment.findMany({
+    where: { video: { channelId } },
     include: {
-      comments: {
-        include: { history: { orderBy: { capturedAt: "asc" } } },
-        orderBy: { publishedAt: "asc" },
-      },
+      history: { orderBy: { capturedAt: "asc" } },
+      video: { select: { id: true, title: true } },
     },
+  });
+
+  // 스레드(본댓글+대댓글) 단위로 최신순 정렬 — 대댓글은 본댓글 발행 시각 기준으로 묶임
+  const byId = new Map(comments.map((c) => [c.id, c]));
+  const threadTime = (c: (typeof comments)[number]) => {
+    const top = c.parentId ? byId.get(c.parentId) : undefined;
+    return (top ?? c).publishedAt.getTime();
+  };
+  const sorted = [...comments].sort((a, b) => {
+    const diff = threadTime(b) - threadTime(a);
+    if (diff !== 0) return diff;
+    return (a.parentId ? 1 : 0) - (b.parentId ? 1 : 0); // 같은 스레드면 본댓글 먼저
   });
 
   return (
@@ -46,23 +55,21 @@ export default async function ChannelCommentsPage({
 
       <div className="mt-6">
         <ChannelCommentsSearch
-          videos={videos.map((video) => ({
-            id: video.id,
-            title: video.title,
-            comments: video.comments.map((c) => ({
-              id: c.id,
-              parentId: c.parentId,
-              authorName: c.authorName,
-              textOriginal: c.textOriginal,
-              likeCount: c.likeCount,
-              publishedAt: c.publishedAt.toISOString(),
-              isDeleted: c.isDeleted,
-              history: c.history.map((h) => ({
-                textOriginal: h.textOriginal,
-                likeCount: h.likeCount,
-                capturedAt: h.capturedAt.toISOString(),
-              })),
+          comments={sorted.map((c) => ({
+            id: c.id,
+            parentId: c.parentId,
+            authorName: c.authorName,
+            textOriginal: c.textOriginal,
+            likeCount: c.likeCount,
+            publishedAt: c.publishedAt.toISOString(),
+            isDeleted: c.isDeleted,
+            history: c.history.map((h) => ({
+              textOriginal: h.textOriginal,
+              likeCount: h.likeCount,
+              capturedAt: h.capturedAt.toISOString(),
             })),
+            videoId: c.video.id,
+            videoTitle: c.video.title,
           }))}
         />
       </div>

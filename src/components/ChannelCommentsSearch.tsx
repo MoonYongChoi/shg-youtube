@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CommentTable } from "@/components/CommentTable";
 
@@ -19,12 +18,8 @@ interface CommentRow {
   publishedAt: string;
   isDeleted: boolean;
   history: HistoryEntry[];
-}
-
-interface VideoWithComments {
-  id: string;
-  title: string;
-  comments: CommentRow[];
+  videoId: string;
+  videoTitle: string;
 }
 
 function filterComments(comments: CommentRow[], query: string): CommentRow[] {
@@ -32,7 +27,9 @@ function filterComments(comments: CommentRow[], query: string): CommentRow[] {
   if (!q) return comments;
 
   const matches = (c: CommentRow) =>
-    c.textOriginal.toLowerCase().includes(q) || c.authorName.toLowerCase().includes(q);
+    c.textOriginal.toLowerCase().includes(q) ||
+    c.authorName.toLowerCase().includes(q) ||
+    c.videoTitle.toLowerCase().includes(q);
 
   const keepIds = new Set<string>();
   for (const c of comments) {
@@ -48,16 +45,12 @@ function filterComments(comments: CommentRow[], query: string): CommentRow[] {
   return comments.filter((c) => keepIds.has(c.id));
 }
 
-export function ChannelCommentsSearch({ videos }: { videos: VideoWithComments[] }) {
+/** comments는 이미 최신순(스레드 단위)으로 정렬되어 들어온다고 가정 */
+export function ChannelCommentsSearch({ comments }: { comments: CommentRow[] }) {
   const [query, setQuery] = useState("");
 
-  const filtered = useMemo(() => {
-    return videos
-      .map((v) => ({ ...v, comments: filterComments(v.comments, query) }))
-      .filter((v) => v.comments.length > 0);
-  }, [videos, query]);
-
-  const totalMatches = filtered.reduce((sum, v) => sum + v.comments.length, 0);
+  const filtered = useMemo(() => filterComments(comments, query), [comments, query]);
+  const matchedThreads = filtered.filter((c) => !c.parentId).length;
 
   return (
     <div>
@@ -66,7 +59,7 @@ export function ChannelCommentsSearch({ videos }: { videos: VideoWithComments[] 
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="댓글 내용이나 작성자로 검색"
+          placeholder="댓글 내용, 작성자, 영상 제목으로 검색"
           className="w-full rounded border border-stone-300 px-3 py-2 text-sm"
         />
         {query && (
@@ -80,29 +73,16 @@ export function ChannelCommentsSearch({ videos }: { videos: VideoWithComments[] 
       </div>
       {query && (
         <p className="mt-2 text-xs text-stone-500">
-          {totalMatches > 0 ? `${totalMatches}개 댓글 매치됨` : "일치하는 댓글이 없습니다"}
+          {matchedThreads > 0 ? `${matchedThreads}개 댓글 매치됨` : "일치하는 댓글이 없습니다"}
         </p>
       )}
 
-      {filtered.length === 0 ? (
-        <p className="mt-8 text-sm text-stone-400">
-          {query ? "검색 결과가 없습니다." : "아직 수집된 댓글이 없습니다."}
-        </p>
-      ) : (
-        <div className="mt-8 flex flex-col gap-10">
-          {filtered.map((video) => (
-            <div key={video.id}>
-              <Link
-                href={`/videos/${video.id}`}
-                className="text-sm font-medium text-stone-600 hover:underline"
-              >
-                {video.title}
-              </Link>
-              <p className="mt-0.5 mb-3 text-xs text-stone-400">댓글 {video.comments.length}개</p>
-              <CommentTable comments={video.comments} />
-            </div>
-          ))}
+      {filtered.length > 0 ? (
+        <div className="mt-6">
+          <CommentTable comments={filtered} />
         </div>
+      ) : (
+        !query && <p className="mt-8 text-sm text-stone-400">아직 수집된 댓글이 없습니다.</p>
       )}
     </div>
   );
