@@ -99,7 +99,7 @@ export function ChannelCommentsSearch({ comments }: { comments: CommentRow[] }) 
 
       {filtered.length > 0 ? (
         <div className="mt-6">
-          <CommentTable comments={filtered} />
+          <CommentTable comments={filtered} highlightQuery={query} />
         </div>
       ) : (
         !query && <p className="mt-8 text-sm text-stone-400">아직 수집된 댓글이 없습니다.</p>

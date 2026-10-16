@@ -22,7 +22,37 @@ interface CommentRow {
   videoTitle?: string;
 }
 
-export function CommentTable({ comments }: { comments: CommentRow[] }) {
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function Highlight({ text, query }: { text: string; query?: string }) {
+  const q = query?.trim();
+  if (!q) return <>{text}</>;
+
+  const parts = text.split(new RegExp(`(${escapeRegExp(q)})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === q.toLowerCase() ? (
+          <mark key={i} className="rounded bg-amber-200 px-0.5">
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
+export function CommentTable({
+  comments,
+  highlightQuery,
+}: {
+  comments: CommentRow[];
+  highlightQuery?: string;
+}) {
   const topLevel = comments.filter((c) => !c.parentId);
   const repliesByParent = new Map<string, CommentRow[]>();
   for (const c of comments) {
@@ -39,10 +69,10 @@ export function CommentTable({ comments }: { comments: CommentRow[] }) {
     <ul className="flex flex-col gap-3">
       {topLevel.map((comment) => (
         <li key={comment.id} className="rounded-xl border border-stone-200 p-4">
-          <CommentItem comment={comment} />
+          <CommentItem comment={comment} highlightQuery={highlightQuery} />
           {(repliesByParent.get(comment.id) ?? []).map((reply) => (
             <div key={reply.id} className="mt-3 ml-4 border-l border-stone-200 pl-3 sm:ml-8 sm:pl-4">
-              <CommentItem comment={reply} showVideoTag={false} />
+              <CommentItem comment={reply} showVideoTag={false} highlightQuery={highlightQuery} />
             </div>
           ))}
         </li>
@@ -54,9 +84,11 @@ export function CommentTable({ comments }: { comments: CommentRow[] }) {
 function CommentItem({
   comment,
   showVideoTag = true,
+  highlightQuery,
 }: {
   comment: CommentRow;
   showVideoTag?: boolean;
+  highlightQuery?: string;
 }) {
   const [showHistory, setShowHistory] = useState(false);
 
@@ -67,17 +99,23 @@ function CommentItem({
           href={`/videos/${comment.videoId}`}
           className="mb-1 block truncate text-xs text-stone-400 hover:underline"
         >
-          {comment.videoTitle}
+          <Highlight text={comment.videoTitle} query={highlightQuery} />
         </Link>
       )}
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
-        <span className="text-sm font-medium">{comment.authorName}</span>
+        <span className="text-sm font-medium">
+          <Highlight text={comment.authorName} query={highlightQuery} />
+        </span>
         <span className="text-xs text-stone-400">
           {new Date(comment.publishedAt).toLocaleString("ko-KR")}
         </span>
       </div>
       <p className="mt-1 text-sm whitespace-pre-wrap">
-        {comment.isDeleted ? <span className="text-stone-400 italic">(삭제됨)</span> : comment.textOriginal}
+        {comment.isDeleted ? (
+          <span className="text-stone-400 italic">(삭제됨)</span>
+        ) : (
+          <Highlight text={comment.textOriginal} query={highlightQuery} />
+        )}
       </p>
       <div className="mt-1 flex items-center gap-3 text-xs text-stone-500">
         <span>좋아요 {comment.likeCount}</span>
@@ -97,7 +135,9 @@ function CommentItem({
               <span className="text-stone-400">
                 {new Date(h.capturedAt).toLocaleString("ko-KR")} 이전 버전:
               </span>{" "}
-              <span className="whitespace-pre-wrap">{h.textOriginal}</span>{" "}
+              <span className="whitespace-pre-wrap">
+                <Highlight text={h.textOriginal} query={highlightQuery} />
+              </span>{" "}
               <span className="text-stone-400">(좋아요 {h.likeCount})</span>
             </li>
           ))}
