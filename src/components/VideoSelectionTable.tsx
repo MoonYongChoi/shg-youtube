@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { SwipeToDeleteRow } from "@/components/SwipeToDeleteRow";
 
 interface VideoRow {
   id: string;
@@ -107,27 +108,22 @@ export function VideoSelectionTable({ videos }: { videos: VideoRow[] }) {
       {/* 모바일: 카드 목록 (좁은 화면에서 표가 넘치는 걸 방지) */}
       <ul className="flex flex-col gap-3 sm:hidden">
         {rows.map((v) => (
-          <li key={v.id} className="rounded-xl border border-stone-200 p-3">
-            <div className="flex items-start justify-between gap-2">
-              <Link href={`/videos/${v.id}`} className="flex min-w-0 items-center gap-2">
-                {v.thumbnailUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={v.thumbnailUrl}
-                    alt=""
-                    className="h-9 w-16 shrink-0 rounded object-cover"
-                  />
-                )}
-                <span className="min-w-0 truncate font-medium hover:underline">{v.title}</span>
-              </Link>
-              <button
-                onClick={() => deleteVideo(v.id, v.title)}
-                disabled={pending === v.id}
-                className="shrink-0 text-xs text-red-600 underline disabled:opacity-50"
-              >
-                삭제
-              </button>
-            </div>
+          <SwipeToDeleteRow
+            key={v.id}
+            onDelete={() => deleteVideo(v.id, v.title)}
+            disabled={pending === v.id}
+          >
+            <Link href={`/videos/${v.id}`} className="flex min-w-0 items-center gap-2">
+              {v.thumbnailUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={v.thumbnailUrl}
+                  alt=""
+                  className="h-9 w-16 shrink-0 rounded object-cover"
+                />
+              )}
+              <span className="min-w-0 truncate font-medium hover:underline">{v.title}</span>
+            </Link>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <MembersOnlyBadge show={v.isMembersOnly} />
               <p className="text-xs text-stone-500">
@@ -148,7 +144,7 @@ export function VideoSelectionTable({ videos }: { videos: VideoRow[] }) {
                 />
               )}
             </div>
-          </li>
+          </SwipeToDeleteRow>
         ))}
       </ul>
 
