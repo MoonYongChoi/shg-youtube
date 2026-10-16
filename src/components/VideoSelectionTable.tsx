@@ -109,8 +109,16 @@ export function VideoSelectionTable({ videos }: { videos: VideoRow[] }) {
         {rows.map((v) => (
           <li key={v.id} className="rounded-xl border border-stone-200 p-3">
             <div className="flex items-start justify-between gap-2">
-              <Link href={`/videos/${v.id}`} className="min-w-0 font-medium hover:underline">
-                {v.title}
+              <Link href={`/videos/${v.id}`} className="flex min-w-0 items-center gap-2">
+                {v.thumbnailUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={v.thumbnailUrl}
+                    alt=""
+                    className="h-9 w-16 shrink-0 rounded object-cover"
+                  />
+                )}
+                <span className="min-w-0 truncate font-medium hover:underline">{v.title}</span>
               </Link>
               <button
                 onClick={() => deleteVideo(v.id, v.title)}
@@ -166,12 +174,18 @@ export function VideoSelectionTable({ videos }: { videos: VideoRow[] }) {
           {rows.map((v) => (
             <tr key={v.id} className="border-b border-stone-100">
               <td className="py-3 pr-4">
-                <div className="flex items-center gap-2">
+                <Link href={`/videos/${v.id}`} className="flex items-center gap-2">
+                  {v.thumbnailUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={v.thumbnailUrl}
+                      alt=""
+                      className="h-9 w-16 shrink-0 rounded object-cover"
+                    />
+                  )}
                   <MembersOnlyBadge show={v.isMembersOnly} />
-                  <Link href={`/videos/${v.id}`} className="truncate hover:underline">
-                    {v.title}
-                  </Link>
-                </div>
+                  <span className="truncate hover:underline">{v.title}</span>
+                </Link>
               </td>
               <td className="py-3 pr-4 text-stone-500">
                 {new Date(v.publishedAt).toLocaleDateString("ko-KR")}
