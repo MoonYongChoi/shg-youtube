@@ -140,7 +140,11 @@ export interface FetchedComment {
   updatedAt: Date;
 }
 
-/** 영상의 모든 댓글 스레드를 페이지네이션으로 수집. 스레드마다 본댓글 + 대댓글 최대 1개만 추출 */
+/**
+ * 영상의 모든 댓글 스레드를 페이지네이션으로 수집.
+ * 스레드마다 본댓글 + "채널 운영자 본인이 단 대댓글"만 추출한다 (다른 사람이 단 대댓글은 수집 제외).
+ * 운영자 대댓글이 하나도 없는 스레드는 아예 수집하지 않는다.
+ */
 export async function fetchAllComments(videoId: string): Promise<FetchedComment[]> {
   const comments: FetchedComment[] = [];
   let pageToken: string | undefined;
@@ -160,15 +164,18 @@ export async function fetchAllComments(videoId: string): Promise<FetchedComment[
 
     for (const thread of res.data.items ?? []) {
       const top = thread.snippet?.topLevelComment;
-      const firstReply = thread.replies?.comments?.[0];
+      const channelOwnerId = thread.snippet?.channelId;
+      const ownerReply = thread.replies?.comments?.find(
+        (r) => r.snippet?.authorChannelId?.value === channelOwnerId,
+      );
 
-      // 대댓글이 하나도 없는 댓글은 수집하지 않음
-      if (!firstReply?.id || !firstReply.snippet) continue;
+      // 채널 운영자가 단 대댓글이 없으면 수집하지 않음
+      if (!ownerReply?.id || !ownerReply.snippet) continue;
 
       if (top?.id && top.snippet) {
         comments.push(toFetchedComment(top.id, null, top.snippet));
       }
-      comments.push(toFetchedComment(firstReply.id, top?.id ?? null, firstReply.snippet));
+      comments.push(toFetchedComment(ownerReply.id, top?.id ?? null, ownerReply.snippet));
     }
 
     pageToken = res.data.nextPageToken ?? undefined;

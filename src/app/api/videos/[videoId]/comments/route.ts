@@ -8,7 +8,7 @@ export async function GET(
   const { videoId } = await params;
 
   const comments = await prisma.comment.findMany({
-    where: { videoId },
+    where: { videoId, isDeleted: false },
     include: { history: { orderBy: { capturedAt: "asc" } } },
     orderBy: { publishedAt: "asc" },
   });

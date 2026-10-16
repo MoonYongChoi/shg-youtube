@@ -17,7 +17,7 @@ export default async function ChannelCommentsPage({
   if (!channel) notFound();
 
   const comments = await prisma.comment.findMany({
-    where: { video: { channelId } },
+    where: { video: { channelId }, isDeleted: false },
     include: {
       history: { orderBy: { capturedAt: "asc" } },
       video: { select: { id: true, title: true } },

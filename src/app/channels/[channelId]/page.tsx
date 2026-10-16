@@ -29,7 +29,7 @@ export default async function ChannelPage({
     include: {
       videos: {
         orderBy: { publishedAt: "desc" },
-        include: { _count: { select: { comments: true } } },
+        include: { _count: { select: { comments: { where: { isDeleted: false } } } } },
       },
     },
   });

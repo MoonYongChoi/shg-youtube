@@ -10,7 +10,7 @@ export async function GET(
   const videos = await prisma.video.findMany({
     where: { channelId },
     orderBy: { publishedAt: "desc" },
-    include: { _count: { select: { comments: true } } },
+    include: { _count: { select: { comments: { where: { isDeleted: false } } } } },
   });
 
   return NextResponse.json(

@@ -15,6 +15,7 @@ export default async function VideoPage({
     where: { id: videoId },
     include: {
       comments: {
+        where: { isDeleted: false },
         include: { history: { orderBy: { capturedAt: "asc" } } },
         orderBy: { publishedAt: "asc" },
       },
