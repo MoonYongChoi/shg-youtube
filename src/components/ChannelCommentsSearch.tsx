@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CommentTable } from "@/components/CommentTable";
 
 interface HistoryEntry {
@@ -22,45 +22,51 @@ interface CommentRow {
   videoTitle: string;
 }
 
-function filterComments(comments: CommentRow[], query: string): CommentRow[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return comments;
-
-  const matches = (c: CommentRow) =>
-    c.textOriginal.toLowerCase().includes(q) ||
-    c.authorName.toLowerCase().includes(q) ||
-    c.videoTitle.toLowerCase().includes(q);
-
-  const keepIds = new Set<string>();
-  for (const c of comments) {
-    if (matches(c)) {
-      keepIds.add(c.id);
-      if (c.parentId) keepIds.add(c.parentId); // 대댓글이 매치되면 본댓글도 같이 보여줌
-    }
-  }
-  for (const c of comments) {
-    if (c.parentId && keepIds.has(c.parentId)) keepIds.add(c.id); // 본댓글이 매치되면 대댓글도 같이 보여줌
-  }
-
-  return comments.filter((c) => keepIds.has(c.id));
-}
-
-/** comments는 이미 최신순(스레드 단위)으로 정렬되어 들어온다고 가정 */
-export function ChannelCommentsSearch({ comments }: { comments: CommentRow[] }) {
+export function ChannelCommentsSearch({
+  channelId,
+  initialItems,
+  initialHasMore,
+  initialTotal,
+}: {
+  channelId: string;
+  initialItems: CommentRow[];
+  initialHasMore: boolean;
+  initialTotal: number;
+}) {
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
+  const [items, setItems] = useState(initialItems);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [total, setTotal] = useState(initialTotal);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const filtered = useMemo(() => filterComments(comments, query), [comments, query]);
-  const matchedThreads = filtered.filter((c) => !c.parentId).length;
+  async function fetchPage(nextPage: number, q: string, replace: boolean) {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/channels/${channelId}/comments/feed?q=${encodeURIComponent(q)}&page=${nextPage}`,
+      );
+      const data = await res.json();
+      setItems((prev) => (replace ? data.items : [...prev, ...data.items]));
+      setHasMore(data.hasMore);
+      setTotal(data.total);
+      setPage(nextPage);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setQuery(draft);
+    fetchPage(0, draft, true);
   }
 
   function handleClear() {
     setDraft("");
     setQuery("");
+    fetchPage(0, "", true);
   }
 
   return (
@@ -91,18 +97,29 @@ export function ChannelCommentsSearch({ comments }: { comments: CommentRow[] }) 
           </button>
         </div>
       </form>
-      {query && (
-        <p className="mt-2 text-xs text-stone-500">
-          {matchedThreads > 0 ? `${matchedThreads}개 댓글 매치됨` : "일치하는 댓글이 없습니다"}
+
+      <p className="mt-2 text-xs text-stone-500">
+        {query ? `${total}개 댓글 매치됨` : `전체 ${total}개 중 ${items.length}개 표시 중`}
+      </p>
+
+      {items.length > 0 ? (
+        <div className="mt-6">
+          <CommentTable comments={items} highlightQuery={query} />
+        </div>
+      ) : (
+        <p className="mt-8 text-sm text-stone-400">
+          {query ? "일치하는 댓글이 없습니다." : "아직 수집된 댓글이 없습니다."}
         </p>
       )}
 
-      {filtered.length > 0 ? (
-        <div className="mt-6">
-          <CommentTable comments={filtered} highlightQuery={query} />
-        </div>
-      ) : (
-        !query && <p className="mt-8 text-sm text-stone-400">아직 수집된 댓글이 없습니다.</p>
+      {hasMore && (
+        <button
+          onClick={() => fetchPage(page + 1, query, false)}
+          disabled={loading}
+          className="mt-6 w-full rounded border border-stone-300 py-2 text-sm font-medium hover:bg-stone-50 disabled:opacity-50"
+        >
+          {loading ? "불러오는 중..." : "더 보기"}
+        </button>
       )}
     </div>
   );

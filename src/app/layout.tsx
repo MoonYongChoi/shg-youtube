@@ -13,8 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://shg-kappa.vercel.app"),
   title: "유튜브 멤버십 댓글 수집기",
   description: "유튜브 채널의 멤버십 영상 댓글을 수집합니다",
+  openGraph: {
+    title: "유튜브 멤버십 댓글 수집기",
+    description: "유튜브 채널의 멤버십 영상 댓글을 수집합니다",
+    type: "website",
+    locale: "ko_KR",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

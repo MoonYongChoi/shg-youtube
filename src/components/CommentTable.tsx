@@ -53,10 +53,13 @@ export function CommentTable({
   comments: CommentRow[];
   highlightQuery?: string;
 }) {
-  const topLevel = comments.filter((c) => !c.parentId);
+  const ids = new Set(comments.map((c) => c.id));
+  // parentId가 있어도 그 본댓글이 이번 목록(페이지)에 없으면 독립된 항목으로 취급
+  // (페이지네이션/검색 결과에서 본댓글과 대댓글이 서로 다른 페이지에 걸쳐 나뉠 수 있어서)
+  const topLevel = comments.filter((c) => !c.parentId || !ids.has(c.parentId));
   const repliesByParent = new Map<string, CommentRow[]>();
   for (const c of comments) {
-    if (c.parentId) {
+    if (c.parentId && ids.has(c.parentId)) {
       repliesByParent.set(c.parentId, [...(repliesByParent.get(c.parentId) ?? []), c]);
     }
   }

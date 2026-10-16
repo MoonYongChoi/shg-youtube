@@ -18,6 +18,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   runtime: "nodejs",
   matcher: [
-    "/((?!login|api/auth/login|api/cron|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|api/auth/login|api/cron|_next/static|_next/image|favicon.ico|opengraph-image).*)",
   ],
 };
