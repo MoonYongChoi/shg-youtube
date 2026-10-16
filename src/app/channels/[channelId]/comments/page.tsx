@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ChannelCommentsSearch } from "@/components/ChannelCommentsSearch";
+import { ExportButton } from "@/components/ExportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -32,12 +33,15 @@ export default async function ChannelCommentsPage({
         <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">
           {channel.title} · 전체 댓글
         </h1>
-        <Link
-          href={`/channels/${channel.id}`}
-          className="shrink-0 rounded border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-50"
-        >
-          영상 목록으로
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <ExportButton href={`/api/channels/${channel.id}/export`} />
+          <Link
+            href={`/channels/${channel.id}`}
+            className="rounded border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-50"
+          >
+            영상 목록으로
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6">

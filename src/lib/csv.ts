@@ -1,6 +1,8 @@
 import Papa from "papaparse";
 
 export interface CommentCsvRow {
+  videoId?: string;
+  videoTitle?: string;
   commentId: string;
   parentId: string | null;
   authorName: string;
@@ -15,6 +17,8 @@ export interface CommentCsvRow {
 
 export function commentsToCsv(rows: CommentCsvRow[]): string {
   const data = rows.map((row) => ({
+    video_id: row.videoId ?? "",
+    video_title: row.videoTitle ?? "",
     comment_id: row.commentId,
     parent_id: row.parentId ?? "",
     type: row.historyIndex !== null ? "history" : "current",
