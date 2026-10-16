@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { syncChannelVideos } from "@/lib/collect";
@@ -5,6 +6,7 @@ import { VideoSelectionTable } from "@/components/VideoSelectionTable";
 import { AddVideoForm } from "@/components/AddVideoForm";
 import { DeleteChannelButton } from "@/components/DeleteChannelButton";
 import { RefreshVideosButton } from "@/components/RefreshVideosButton";
+import { RecollectAllButton } from "@/components/RecollectAllButton";
 
 export const dynamic = "force-dynamic";
 
@@ -38,8 +40,15 @@ export default async function ChannelPage({
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">{channel.title}</h1>
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
           <RefreshVideosButton channelId={channel.id} />
+          <RecollectAllButton channelId={channel.id} />
+          <Link
+            href={`/channels/${channel.id}/comments`}
+            className="rounded border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-50"
+          >
+            댓글만 모아보기
+          </Link>
           <DeleteChannelButton channelId={channel.id} channelTitle={channel.title} redirectTo="/" />
         </div>
       </div>
