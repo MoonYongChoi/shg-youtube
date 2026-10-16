@@ -47,30 +47,50 @@ function filterComments(comments: CommentRow[], query: string): CommentRow[] {
 
 /** comments는 이미 최신순(스레드 단위)으로 정렬되어 들어온다고 가정 */
 export function ChannelCommentsSearch({ comments }: { comments: CommentRow[] }) {
+  const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => filterComments(comments, query), [comments, query]);
   const matchedThreads = filtered.filter((c) => !c.parentId).length;
 
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setQuery(draft);
+  }
+
+  function handleClear() {
+    setDraft("");
+    setQuery("");
+  }
+
   return (
     <div>
-      <div className="relative">
+      <form onSubmit={handleSubmit} className="relative">
         <input
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="댓글 내용, 작성자, 영상 제목으로 검색"
-          className="w-full rounded border border-stone-300 px-3 py-2 text-sm"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="댓글 내용, 작성자, 영상 제목으로 검색 (Enter로 검색)"
+          className="w-full rounded border border-stone-300 px-3 py-2 pr-16 text-sm"
         />
-        {query && (
+        <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-2">
+          {draft && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="text-xs text-stone-400 hover:text-stone-600"
+            >
+              지우기
+            </button>
+          )}
           <button
-            onClick={() => setQuery("")}
-            className="absolute top-1/2 right-2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-600"
+            type="submit"
+            className="rounded bg-stone-800 px-2 py-1 text-xs font-medium text-white hover:bg-stone-900"
           >
-            지우기
+            검색
           </button>
-        )}
-      </div>
+        </div>
+      </form>
       {query && (
         <p className="mt-2 text-xs text-stone-500">
           {matchedThreads > 0 ? `${matchedThreads}개 댓글 매치됨` : "일치하는 댓글이 없습니다"}
