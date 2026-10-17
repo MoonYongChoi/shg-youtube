@@ -32,6 +32,11 @@ export default async function ChannelPage({
 
   if (!channel) notFound();
 
+  const lastCollectedAt = channel.videos.reduce<Date | null>((max, v) => {
+    if (!v.lastScrapedAt) return max;
+    return !max || v.lastScrapedAt > max ? v.lastScrapedAt : max;
+  }, null);
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
       <BackButton />
@@ -56,6 +61,9 @@ export default async function ChannelPage({
       </div>
       <p className="mt-2 text-sm text-stone-500">
         멤버십 전용 영상을 체크하고 모니터링을 켜면 댓글 수집이 시작됩니다.
+      </p>
+      <p className="mt-1 text-xs text-stone-400">
+        마지막 수집: {lastCollectedAt ? lastCollectedAt.toLocaleString("ko-KR") : "없음"}
       </p>
 
       <AddVideoForm />

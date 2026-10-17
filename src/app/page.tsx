@@ -9,7 +9,10 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const channels = await prisma.channel.findMany({
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { videos: true } } },
+    include: {
+      _count: { select: { videos: true } },
+      videos: { select: { lastScrapedAt: true } },
+    },
   });
 
   return (
@@ -33,20 +36,30 @@ export default async function Home() {
           <p className="mt-3 text-sm text-stone-400">아직 등록된 채널이 없습니다.</p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
-            {channels.map((c) => (
-              <li
-                key={c.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-stone-200 px-4 py-3 hover:bg-stone-50"
-              >
-                <Link href={`/channels/${c.id}`} className="min-w-0 flex-1">
-                  <span className="truncate font-medium">{c.title}</span>
-                </Link>
-                <div className="flex shrink-0 items-center gap-3">
-                  <span className="text-sm text-stone-500">{c._count.videos}개 영상</span>
-                  <DeleteChannelButton channelId={c.id} channelTitle={c.title} />
-                </div>
-              </li>
-            ))}
+            {channels.map((c) => {
+              const lastCollectedAt = c.videos.reduce<Date | null>((max, v) => {
+                if (!v.lastScrapedAt) return max;
+                return !max || v.lastScrapedAt > max ? v.lastScrapedAt : max;
+              }, null);
+
+              return (
+                <li
+                  key={c.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-stone-200 px-4 py-3 hover:bg-stone-50"
+                >
+                  <Link href={`/channels/${c.id}`} className="min-w-0 flex-1">
+                    <span className="truncate font-medium">{c.title}</span>
+                    <p className="mt-0.5 text-xs text-stone-400">
+                      마지막 수집: {lastCollectedAt ? lastCollectedAt.toLocaleString("ko-KR") : "없음"}
+                    </p>
+                  </Link>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span className="text-sm text-stone-500">{c._count.videos}개 영상</span>
+                    <DeleteChannelButton channelId={c.id} channelTitle={c.title} />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
