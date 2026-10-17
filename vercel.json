@@ -1,6 +1,6 @@
 {
   "regions": ["icn1"],
   "crons": [
-    { "path": "/api/cron/rescrape", "schedule": "0 0 * * *" }
+    { "path": "/api/cron/rescrape", "schedule": "30 14 * * 1-5" }
   ]
 }
