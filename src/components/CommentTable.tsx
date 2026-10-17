@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { formatKST } from "@/lib/date";
 
 interface HistoryEntry {
   textOriginal: string;
@@ -110,7 +111,7 @@ function CommentItem({
           <Highlight text={comment.authorName} query={highlightQuery} />
         </span>
         <span className="text-xs text-stone-400">
-          {new Date(comment.publishedAt).toLocaleString("ko-KR")}
+          {formatKST(comment.publishedAt)}
         </span>
       </div>
       <p className="mt-1 text-sm whitespace-pre-wrap">
@@ -136,7 +137,7 @@ function CommentItem({
           {comment.history.map((h, idx) => (
             <li key={idx}>
               <span className="text-stone-400">
-                {new Date(h.capturedAt).toLocaleString("ko-KR")} 이전 버전:
+                {formatKST(h.capturedAt)} 이전 버전:
               </span>{" "}
               <span className="whitespace-pre-wrap">
                 <Highlight text={h.textOriginal} query={highlightQuery} />

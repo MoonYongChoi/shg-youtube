@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SwipeToDeleteRow } from "@/components/SwipeToDeleteRow";
+import { formatKSTDate } from "@/lib/date";
 
 interface VideoRow {
   id: string;
@@ -127,7 +128,7 @@ export function VideoSelectionTable({ videos }: { videos: VideoRow[] }) {
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <MembersOnlyBadge show={v.isMembersOnly} />
               <p className="text-xs text-stone-500">
-                {new Date(v.publishedAt).toLocaleDateString("ko-KR")} · 댓글 {v.commentCount}개
+                {formatKSTDate(v.publishedAt)} · 댓글 {v.commentCount}개
               </p>
             </div>
             <div className="mt-3 flex items-center gap-1 text-sm">
@@ -184,7 +185,7 @@ export function VideoSelectionTable({ videos }: { videos: VideoRow[] }) {
                 </Link>
               </td>
               <td className="py-3 pr-4 text-stone-500">
-                {new Date(v.publishedAt).toLocaleDateString("ko-KR")}
+                {formatKSTDate(v.publishedAt)}
               </td>
               <td className="py-3 pr-4 text-center">
                 <div className="flex items-center justify-center gap-2">

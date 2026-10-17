@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { ChannelForm } from "@/components/ChannelForm";
 import { GoogleConnectButton } from "@/components/GoogleConnectButton";
 import { DeleteChannelButton } from "@/components/DeleteChannelButton";
+import { formatKST } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export default async function Home() {
                   <Link href={`/channels/${c.id}`} className="min-w-0 flex-1">
                     <span className="truncate font-medium">{c.title}</span>
                     <p className="mt-0.5 text-xs text-stone-400">
-                      마지막 수집: {lastCollectedAt ? lastCollectedAt.toLocaleString("ko-KR") : "없음"}
+                      마지막 수집: {lastCollectedAt ? formatKST(lastCollectedAt) : "없음"}
                     </p>
                   </Link>
                   <div className="flex shrink-0 items-center gap-3">

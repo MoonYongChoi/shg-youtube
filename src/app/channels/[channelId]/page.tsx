@@ -6,6 +6,7 @@ import { AddVideoForm } from "@/components/AddVideoForm";
 import { DeleteChannelButton } from "@/components/DeleteChannelButton";
 import { RecollectAllButton } from "@/components/RecollectAllButton";
 import { BackButton } from "@/components/BackButton";
+import { formatKST } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +64,7 @@ export default async function ChannelPage({
         멤버십 전용 영상을 체크하고 모니터링을 켜면 댓글 수집이 시작됩니다.
       </p>
       <p className="mt-1 text-xs text-stone-400">
-        마지막 수집: {lastCollectedAt ? lastCollectedAt.toLocaleString("ko-KR") : "없음"}
+        마지막 수집: {lastCollectedAt ? formatKST(lastCollectedAt) : "없음"}
       </p>
 
       <AddVideoForm />

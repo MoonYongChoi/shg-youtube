@@ -4,6 +4,7 @@ import { CommentTable } from "@/components/CommentTable";
 import { ExportButton } from "@/components/ExportButton";
 import { RecollectButton } from "@/components/RecollectButton";
 import { BackButton } from "@/components/BackButton";
+import { formatKST } from "@/lib/date";
 
 export default async function VideoPage({
   params,
@@ -33,7 +34,7 @@ export default async function VideoPage({
           <h1 className="text-xl font-semibold sm:text-2xl">{video.title}</h1>
           <p className="mt-1 text-sm text-stone-500">
             댓글 {video.comments.length}개 · 마지막 수집:{" "}
-            {video.lastScrapedAt ? video.lastScrapedAt.toLocaleString("ko-KR") : "없음"}
+            {video.lastScrapedAt ? formatKST(video.lastScrapedAt) : "없음"}
           </p>
         </div>
         <div className="flex gap-2">
