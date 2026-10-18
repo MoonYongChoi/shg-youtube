@@ -15,7 +15,10 @@ export interface CollectResult {
  * 이번 응답에 없는 기존 댓글은 isDeleted로 표시한다.
  */
 export async function collectComments(videoId: string): Promise<CollectResult> {
-  const fetched = await fetchAllComments(videoId);
+  const rawFetched = await fetchAllComments(videoId);
+  // commentThreads.list 페이지 경계에서 같은 스레드가 두 페이지에 걸쳐 중복으로 올 때가 있어
+  // id 기준으로 한 번 더 중복 제거한다 (안 하면 같은 id로 create를 두 번 시도해 unique 제약 위반 발생)
+  const fetched = [...new Map(rawFetched.map((c) => [c.id, c])).values()];
   const existing = await prisma.comment.findMany({ where: { videoId } });
   const existingById = new Map(existing.map((c) => [c.id, c]));
   const fetchedIds = new Set(fetched.map((c) => c.id));
@@ -28,8 +31,12 @@ export async function collectComments(videoId: string): Promise<CollectResult> {
     const prev = existingById.get(comment.id);
 
     if (!prev) {
-      await prisma.comment.create({
-        data: {
+      // id는 전역 유니크라서, 혹시 디듑 후에도 다른 영상에 같은 id가 이미 있으면 create가 깨질 수
+      // 있으니 upsert로 방어한다 (해당 id가 이 영상 소속이 아니었을 가능성은 거의 없지만 전체 배치가
+      // 하나의 예외로 통째로 죽는 것보다는 안전함)
+      await prisma.comment.upsert({
+        where: { id: comment.id },
+        create: {
           id: comment.id,
           videoId,
           parentId: comment.parentId,
@@ -39,6 +46,13 @@ export async function collectComments(videoId: string): Promise<CollectResult> {
           likeCount: comment.likeCount,
           publishedAt: comment.publishedAt,
           updatedAt: comment.updatedAt,
+        },
+        update: {
+          textOriginal: comment.textOriginal,
+          likeCount: comment.likeCount,
+          updatedAt: comment.updatedAt,
+          isDeleted: false,
+          deletedAt: null,
         },
       });
       created++;
