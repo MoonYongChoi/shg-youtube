@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { commentsToCsv, type CommentCsvRow } from "@/lib/csv";
+import { channelThreadsToCsv } from "@/lib/csv";
 
 export async function GET(
   _request: Request,
@@ -19,44 +19,7 @@ export async function GET(
     },
   });
 
-  const rows: CommentCsvRow[] = [];
-  for (const video of videos) {
-    for (const comment of video.comments) {
-      rows.push({
-        videoId: video.id,
-        videoTitle: video.title,
-        commentId: comment.id,
-        parentId: comment.parentId,
-        authorName: comment.authorName,
-        textOriginal: comment.textOriginal,
-        likeCount: comment.likeCount,
-        publishedAt: comment.publishedAt,
-        updatedAt: comment.updatedAt,
-        isDeleted: comment.isDeleted,
-        historyIndex: null,
-        historyCapturedAt: null,
-      });
-
-      comment.history.forEach((h, idx) => {
-        rows.push({
-          videoId: video.id,
-          videoTitle: video.title,
-          commentId: comment.id,
-          parentId: comment.parentId,
-          authorName: comment.authorName,
-          textOriginal: h.textOriginal,
-          likeCount: h.likeCount,
-          publishedAt: comment.publishedAt,
-          updatedAt: h.updatedAt,
-          isDeleted: false,
-          historyIndex: idx + 1,
-          historyCapturedAt: h.capturedAt,
-        });
-      });
-    }
-  }
-
-  const csv = commentsToCsv(rows);
+  const csv = channelThreadsToCsv(videos);
 
   return new NextResponse(csv, {
     headers: {

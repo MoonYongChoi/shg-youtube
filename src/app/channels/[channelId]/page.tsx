@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { VideoSelectionTable } from "@/components/VideoSelectionTable";
 import { AddVideoForm } from "@/components/AddVideoForm";
-import { DeleteChannelButton } from "@/components/DeleteChannelButton";
 import { RecollectAllButton } from "@/components/RecollectAllButton";
 import { BackButton } from "@/components/BackButton";
 import { formatKST } from "@/lib/date";
@@ -57,7 +56,6 @@ export default async function ChannelPage({
           >
             키워드 분석
           </Link>
-          <DeleteChannelButton channelId={channel.id} channelTitle={channel.title} redirectTo="/" />
         </div>
       </div>
       <p className="mt-2 text-sm text-stone-500">

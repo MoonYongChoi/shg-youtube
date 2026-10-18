@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { extractKeywords } from "@/lib/keywords";
 import { BackButton } from "@/components/BackButton";
 import { ExcludeKeywordButton, RestoreKeywordButton } from "@/components/ExcludeKeywordButton";
+import { RefreshButton } from "@/components/RefreshButton";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,12 @@ export default async function ChannelKeywordsPage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-16">
       <BackButton />
-      <h1 className="text-xl font-semibold sm:text-2xl">{channel.title} · 키워드 분석</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">
+          {channel.title} · 키워드 분석
+        </h1>
+        <RefreshButton />
+      </div>
       <p className="mt-2 text-sm text-stone-500">
         시청자 댓글 {comments.length}개에서 자주 등장한 단어 상위 {keywords.length}개입니다. 정식
         형태소 분석이 아니라 조사를 떼어내는 간단한 방식이라 참고용으로만 봐주세요.
