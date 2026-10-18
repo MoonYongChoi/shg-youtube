@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
+import { logLoginAttempt } from "@/lib/logging";
 
 const COOKIE_NAME = "app_auth";
 
@@ -12,9 +13,11 @@ export async function POST(request: NextRequest) {
   const password = body?.password;
 
   if (typeof password !== "string" || password !== process.env.APP_PASSWORD) {
+    await logLoginAttempt(false, request.headers);
     return NextResponse.json({ error: "비밀번호가 올바르지 않습니다." }, { status: 401 });
   }
 
+  await logLoginAttempt(true, request.headers);
   const response = NextResponse.json({ ok: true });
   response.cookies.set(COOKIE_NAME, hashPassword(password), {
     httpOnly: true,

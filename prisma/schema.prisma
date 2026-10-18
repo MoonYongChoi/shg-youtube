@@ -80,3 +80,25 @@ model GoogleAuth {
   scope        String
   updatedAt    DateTime @updatedAt
 }
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  success   Boolean
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model AccessLog {
+  id         String   @id @default(cuid())
+  method     String
+  path       String
+  authorized Boolean
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
