@@ -18,12 +18,7 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-16">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold sm:text-2xl">유튜브 멤버십 댓글 수집기</h1>
-        <Link href="/logs" className="text-xs text-stone-400 underline hover:text-stone-600">
-          접속 로그
-        </Link>
-      </div>
+      <h1 className="text-xl font-semibold sm:text-2xl">유튜브 멤버십 댓글 수집기</h1>
       <p className="mt-2 text-sm text-stone-500">
         채널 URL이나 핸들(@채널명)을 입력하면 해당 채널의 영상 목록을 가져옵니다.
       </p>
