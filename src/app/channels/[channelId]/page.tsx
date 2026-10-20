@@ -43,7 +43,9 @@ export default async function ChannelPage({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">{channel.title}</h1>
         <div className="flex shrink-0 flex-wrap items-center gap-3">
-          <RecollectAllButton channelId={channel.id} />
+          <RecollectAllButton
+            videoIds={channel.videos.filter((v) => v.monitored).map((v) => v.id)}
+          />
           <Link
             href={`/channels/${channel.id}/comments`}
             className="rounded border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-50"
