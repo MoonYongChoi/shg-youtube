@@ -31,13 +31,11 @@ export interface KeywordCount {
 /**
  * 한국어 형태소 분석기 없이 간단한 휴리스틱(공백/문장부호 분리 + 흔한 조사 제거 + 불용어 필터)으로
  * 단어 빈도를 센다. 정확한 형태소 분석은 아니지만 참고용 키워드 랭킹으로는 충분하다.
+ * 댓글 전체를 다시 훑는 무거운 작업이라 결과는 캐싱해서 쓰고(src/lib/keywordCache.ts), 여기서는
+ * 전체 빈도표만 만든다 — 제외 키워드 적용/상위 N개 추리기는 rankKeywords에서 가볍게 처리한다.
  */
-export function extractKeywords(
-  texts: string[],
-  topN = 50,
-  excludeWords: Set<string> = new Set(),
-): KeywordCount[] {
-  const freq = new Map<string, number>();
+export function computeWordFrequencies(texts: string[]): Record<string, number> {
+  const freq: Record<string, number> = {};
   const urlRe = /https?:\/\/\S+/g;
   const nonWordRe = /[^\p{L}\p{N}]+/gu;
 
@@ -49,12 +47,20 @@ export function extractKeywords(
       const stripped = stripParticle(raw);
       if (stripped.length < 2) continue;
       if (STOPWORDS.has(stripped)) continue;
-      if (excludeWords.has(stripped)) continue;
-      freq.set(stripped, (freq.get(stripped) ?? 0) + 1);
+      freq[stripped] = (freq[stripped] ?? 0) + 1;
     }
   }
 
-  return [...freq.entries()]
+  return freq;
+}
+
+export function rankKeywords(
+  frequencies: Record<string, number>,
+  excludeWords: Set<string>,
+  topN = 50,
+): KeywordCount[] {
+  return Object.entries(frequencies)
+    .filter(([word]) => !excludeWords.has(word))
     .sort((a, b) => b[1] - a[1])
     .slice(0, topN)
     .map(([word, count]) => ({ word, count }));

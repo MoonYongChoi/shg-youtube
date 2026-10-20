@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { extractKeywords } from "@/lib/keywords";
+import { rankKeywords } from "@/lib/keywords";
+import { getKeywordFrequencies } from "@/lib/keywordCache";
 import { BackButton } from "@/components/BackButton";
 import { ExcludeKeywordButton, RestoreKeywordButton } from "@/components/ExcludeKeywordButton";
-import { RefreshButton } from "@/components/RefreshButton";
+import { KeywordRefreshButton } from "@/components/KeywordRefreshButton";
+import { formatKST } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
 
@@ -17,16 +19,13 @@ export default async function ChannelKeywordsPage({
   const channel = await prisma.channel.findUnique({ where: { id: channelId } });
   if (!channel) notFound();
 
-  const [comments, excluded] = await Promise.all([
-    prisma.comment.findMany({
-      where: { video: { channelId }, isDeleted: false, parentId: null },
-      select: { textOriginal: true },
-    }),
+  const [{ frequencies, commentCount, updatedAt }, excluded] = await Promise.all([
+    getKeywordFrequencies(channelId),
     prisma.excludedKeyword.findMany({ where: { channelId }, orderBy: { createdAt: "desc" } }),
   ]);
 
   const excludeWords = new Set(excluded.map((e) => e.word));
-  const keywords = extractKeywords(comments.map((c) => c.textOriginal), 50, excludeWords);
+  const keywords = rankKeywords(frequencies, excludeWords, 50);
   const maxCount = keywords[0]?.count ?? 1;
 
   return (
@@ -36,12 +35,13 @@ export default async function ChannelKeywordsPage({
         <h1 className="min-w-0 truncate text-xl font-semibold sm:text-2xl">
           {channel.title} · 키워드 분석
         </h1>
-        <RefreshButton />
+        <KeywordRefreshButton channelId={channel.id} />
       </div>
       <p className="mt-2 text-sm text-stone-500">
-        시청자 댓글 {comments.length}개에서 자주 등장한 단어 상위 {keywords.length}개입니다. 정식
+        시청자 댓글 {commentCount}개에서 자주 등장한 단어 상위 {keywords.length}개입니다. 정식
         형태소 분석이 아니라 조사를 떼어내는 간단한 방식이라 참고용으로만 봐주세요.
       </p>
+      <p className="mt-1 text-xs text-stone-400">마지막 분석: {formatKST(updatedAt)}</p>
 
       {keywords.length === 0 ? (
         <p className="mt-8 text-sm text-stone-400">분석할 댓글이 없습니다.</p>

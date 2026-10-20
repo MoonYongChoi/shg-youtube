@@ -15,6 +15,7 @@ model Channel {
   createdAt        DateTime          @default(now())
   videos           Video[]
   excludedKeywords ExcludedKeyword[]
+  keywordCache     KeywordCache?
 }
 
 model ExcludedKeyword {
@@ -70,6 +71,14 @@ model CommentHistory {
   capturedAt   DateTime @default(now())
 
   @@index([commentId])
+}
+
+model KeywordCache {
+  channelId    String   @id
+  channel      Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  frequencies  Json
+  commentCount Int
+  updatedAt    DateTime @updatedAt
 }
 
 model GoogleAuth {
