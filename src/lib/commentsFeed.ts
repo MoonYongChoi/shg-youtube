@@ -70,7 +70,7 @@ async function fetchThreadsInOrder(rootIds: string[]): Promise<CommentFeedItem[]
 
 /**
  * 채널의 댓글을 "원 댓글(본댓글) 작성일" 기준 최신순으로 페이지 단위로 가져온다.
- * q가 있으면 본문/작성자/영상 제목에서 검색하되, 본댓글/대댓글 둘 중 하나라도 매치되면
+ * q가 있으면 본문/작성자에서 검색하되, 본댓글/대댓글 둘 중 하나라도 매치되면
  * 그 스레드(본댓글+대댓글) 전체를 같이 보여준다.
  * 13000개가 넘는 댓글을 한 번에 다 내려보내면 스크롤/렌더링/필터링이 전부 느려져서,
  * DB에서 바로 페이지네이션+검색까지 처리하고 결과만 내려보낸다.
@@ -111,7 +111,6 @@ export async function getChannelCommentsFeed(
       OR: [
         { textOriginal: { contains: query, mode: "insensitive" } },
         { authorName: { contains: query, mode: "insensitive" } },
-        { video: { title: { contains: query, mode: "insensitive" } } },
       ],
     },
     select: { id: true, parentId: true },
