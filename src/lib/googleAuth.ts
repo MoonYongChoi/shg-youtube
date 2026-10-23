@@ -53,9 +53,29 @@ export async function exchangeCodeForTokens(code: string, redirectUri: string): 
   });
 }
 
-export async function isGoogleConnected(): Promise<boolean> {
+export type GoogleConnectionStatus = "connected" | "expired" | "disconnected";
+
+/**
+ * DB에 행이 있다고 "연동됨"이라고 보면 안 된다 — 리프레시 토큰이 구글 쪽에서 무효화돼도
+ * (테스트 모드 7일 만료, 권한 해제 등) 행은 그대로 남아있어서 화면엔 계속 연동된 것처럼
+ * 보이는 문제가 있었다. 실제로 토큰을 한 번 갱신해봐서 진짜 살아있는지 확인한다.
+ */
+export async function getGoogleConnectionStatus(): Promise<GoogleConnectionStatus> {
   const row = await prisma.googleAuth.findUnique({ where: { id: GOOGLE_AUTH_ROW_ID } });
-  return row !== null;
+  if (!row) return "disconnected";
+
+  const client = createOAuth2Client("");
+  client.setCredentials({
+    refresh_token: row.refreshToken,
+    expiry_date: row.expiryDate.getTime(),
+  });
+
+  try {
+    await client.getAccessToken();
+    return "connected";
+  } catch {
+    return "expired";
+  }
 }
 
 export async function disconnectGoogle(): Promise<void> {

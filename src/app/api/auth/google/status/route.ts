@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { isGoogleConnected } from "@/lib/googleAuth";
+import { getGoogleConnectionStatus } from "@/lib/googleAuth";
 
 export async function GET() {
-  return NextResponse.json({ connected: await isGoogleConnected() });
+  return NextResponse.json({ status: await getGoogleConnectionStatus() });
 }
